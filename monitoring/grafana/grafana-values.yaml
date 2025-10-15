@@ -1,0 +1,147 @@
+# Grafana Helm chart values for SRE Portfolio project
+
+# Grafana configuration
+grafana:
+  # Admin credentials
+  adminUser: admin
+  adminPassword: admin123
+  
+  # Resource limits
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 200m
+      memory: 512Mi
+  
+  # Persistent storage
+  persistence:
+    enabled: true
+    size: 5Gi
+    storageClass: "standard"
+  
+  # Service configuration
+  service:
+    type: NodePort
+    nodePort: 30000
+    annotations: {}
+  
+  # Ingress configuration
+  ingress:
+    enabled: false
+    annotations: {}
+    hosts: []
+    tls: []
+  
+  # Grafana configuration
+  grafana.ini:
+    server:
+      root_url: http://localhost:30000
+    security:
+      admin_user: admin
+      admin_password: admin123
+    users:
+      allow_sign_up: false
+      auto_assign_org: true
+      auto_assign_org_role: Viewer
+    auth:
+      disable_login_form: false
+      disable_signout_menu: false
+    auth.anonymous:
+      enabled: false
+    log:
+      level: info
+      mode: console
+    metrics:
+      enabled: true
+      interval_seconds: 10
+    analytics:
+      reporting_enabled: false
+      check_for_updates: false
+    snapshots:
+      external_enabled: false
+    dashboards:
+      default_home_dashboard_path: /var/lib/grafana/dashboards/hello-api-dashboard.json
+  
+  # Dashboard providers
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+      - name: 'default'
+        orgId: 1
+        folder: ''
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/default
+  
+  # Dashboard configmaps
+  dashboards:
+    default:
+      hello-api-dashboard:
+        gnetId: 0
+        revision: 0
+        datasource: Prometheus
+  
+  # Sidecar for automatic dashboard discovery
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+      labelValue: "1"
+      folder: /var/lib/grafana/dashboards/default
+      defaultFolderName: null
+      searchNamespace: ALL
+      provider:
+        allowUiUpdates: true
+        foldersFromFilesStructure: true
+    datasources:
+      enabled: true
+      label: grafana_datasource
+      labelValue: "1"
+      searchNamespace: ALL
+      defaultDatasourceEnabled: true
+
+# Service account
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+# RBAC
+rbac:
+  create: true
+
+# Pod security context
+podSecurityContext:
+  fsGroup: 472
+  runAsUser: 472
+  runAsGroup: 472
+  runAsNonRoot: true
+
+# Security context
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: false
+  runAsNonRoot: true
+  runAsUser: 472
+
+# Node selector
+nodeSelector: {}
+
+# Tolerations
+tolerations: []
+
+# Affinity
+affinity: {}
+
+# Pod disruption budget
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1

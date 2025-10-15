@@ -1,0 +1,15 @@
+apiVersion: v2
+name: portfolio
+description: DevOps Portfolio Application - Next.js
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - portfolio
+  - nextjs
+  - devops
+  - sre
+maintainers:
+  - name: B Manoj
+    email: manojb1022@gmail.com
+

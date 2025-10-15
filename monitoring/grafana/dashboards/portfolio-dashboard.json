@@ -1,0 +1,112 @@
+{
+  "dashboard": {
+    "title": "Portfolio App Dashboard",
+    "tags": ["portfolio", "nextjs", "nodejs"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Application Status",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "up{job=\"portfolio\"}",
+            "legendFormat": "Status"
+          }
+        ],
+        "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Uptime",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "process_uptime_seconds{job=\"portfolio\"}",
+            "legendFormat": "Uptime (seconds)"
+          }
+        ],
+        "gridPos": {"h": 4, "w": 6, "x": 6, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "Pod Count",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "count(up{job=\"portfolio\"} == 1)",
+            "legendFormat": "Running Pods"
+          }
+        ],
+        "gridPos": {"h": 4, "w": 6, "x": 12, "y": 0}
+      },
+      {
+        "id": 4,
+        "title": "Memory Usage",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "process_memory_usage_bytes{type=\"heapUsed\",job=\"portfolio\"} / 1024 / 1024",
+            "legendFormat": "Heap Used (MB)"
+          }
+        ],
+        "gridPos": {"h": 4, "w": 6, "x": 18, "y": 0}
+      },
+      {
+        "id": 5,
+        "title": "HTTP Requests",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{job=\"portfolio\"}[5m])",
+            "legendFormat": "{{method}} - {{status}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4}
+      },
+      {
+        "id": 6,
+        "title": "Memory Usage Over Time",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "process_memory_usage_bytes{job=\"portfolio\"} / 1024 / 1024",
+            "legendFormat": "{{type}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4}
+      },
+      {
+        "id": 7,
+        "title": "CPU Usage",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(container_cpu_usage_seconds_total{pod=~\".*portfolio.*\"}[5m]) * 100",
+            "legendFormat": "{{pod}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12}
+      },
+      {
+        "id": 8,
+        "title": "Network I/O",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(container_network_receive_bytes_total{pod=~\".*portfolio.*\"}[5m])",
+            "legendFormat": "Receive - {{pod}}"
+          },
+          {
+            "expr": "rate(container_network_transmit_bytes_total{pod=~\".*portfolio.*\"}[5m])",
+            "legendFormat": "Transmit - {{pod}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 12}
+      }
+    ],
+    "refresh": "10s",
+    "time": {"from": "now-1h", "to": "now"}
+  }
+}
+

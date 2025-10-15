@@ -1,0 +1,217 @@
+# Prometheus Helm chart values for SRE Portfolio project
+
+# Prometheus server configuration
+server:
+  # Resource limits
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+    requests:
+      cpu: 500m
+      memory: 1Gi
+  
+  # Storage configuration
+  persistentVolume:
+    enabled: true
+    size: 10Gi
+    storageClass: "standard"
+  
+  # Retention policy
+  retention: "15d"
+  
+  # Global scrape interval
+  global:
+    scrape_interval: 30s
+    evaluation_interval: 30s
+  
+  # Additional configuration
+  extraArgs:
+    - --web.enable-lifecycle
+    - --web.enable-admin-api
+    - --storage.tsdb.retention.time=15d
+    - --storage.tsdb.retention.size=5GB
+
+# Alertmanager configuration
+alertmanager:
+  enabled: true
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  
+  # Persistent storage for alertmanager
+  persistentVolume:
+    enabled: true
+    size: 2Gi
+    storageClass: "standard"
+
+# Node exporter for system metrics
+nodeExporter:
+  enabled: true
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+
+# Kube-state-metrics for Kubernetes metrics
+kubeStateMetrics:
+  enabled: true
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+
+# Pushgateway for batch jobs
+pushgateway:
+  enabled: false
+
+# ServiceMonitor configuration
+serviceMonitor:
+  enabled: true
+  interval: 30s
+  scrapeTimeout: 10s
+
+# Additional scrape configs
+extraScrapeConfigs: |
+  - job_name: 'hello-api'
+    kubernetes_sd_configs:
+      - role: endpoints
+        namespaces:
+          names:
+            - hello-api
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+        action: keep
+        regex: true
+      - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+        action: replace
+        target_label: __metrics_path__
+        regex: (.+)
+      - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+        action: replace
+        regex: ([^:]+)(?::\d+)?;(\d+)
+        replacement: $1:$2
+        target_label: __address__
+      - action: labelmap
+        regex: __meta_kubernetes_service_label_(.+)
+      - source_labels: [__meta_kubernetes_namespace]
+        action: replace
+        target_label: kubernetes_namespace
+      - source_labels: [__meta_kubernetes_service_name]
+        action: replace
+        target_label: kubernetes_name
+
+# Alert rules
+serverFiles:
+  alerting_rules.yml:
+    groups:
+      - name: hello-api.rules
+        rules:
+          - alert: HelloAPIHighErrorRate
+            expr: rate(http_requests_total{status_code=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.05
+            for: 2m
+            labels:
+              severity: warning
+            annotations:
+              summary: "High error rate detected"
+              description: "Error rate is {{ $value | humanizePercentage }} for {{ $labels.instance }}"
+          
+          - alert: HelloAPIHighLatency
+            expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 0.5
+            for: 2m
+            labels:
+              severity: warning
+            annotations:
+              summary: "High latency detected"
+              description: "95th percentile latency is {{ $value }}s for {{ $labels.instance }}"
+          
+          - alert: HelloAPIDown
+            expr: up{job="hello-api"} == 0
+            for: 1m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Hello API is down"
+              description: "Hello API has been down for more than 1 minute"
+          
+          - alert: HelloAPIPodRestart
+            expr: rate(kube_pod_container_status_restarts_total{container="hello-api"}[15m]) > 0
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Pod restart detected"
+              description: "Pod {{ $labels.pod }} has restarted {{ $value }} times in the last 15 minutes"
+          
+          - alert: HelloAPIHighMemoryUsage
+            expr: (app_memory_usage_bytes / 1024 / 1024) > 400
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "High memory usage"
+              description: "Memory usage is {{ $value }}MB for {{ $labels.instance }}"
+          
+          - alert: HelloAPILowAvailability
+            expr: (sum(rate(http_requests_total[5m])) by (instance) / sum(rate(http_requests_total[5m])) by (instance)) < 0.95
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Low availability detected"
+              description: "Availability is {{ $value | humanizePercentage }} for {{ $labels.instance }}"
+
+# Grafana configuration
+grafana:
+  enabled: true
+  adminPassword: "admin123"
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 200m
+      memory: 512Mi
+  
+  # Persistent storage for Grafana
+  persistence:
+    enabled: true
+    size: 5Gi
+    storageClass: "standard"
+  
+  # Service configuration
+  service:
+    type: NodePort
+    nodePort: 30000
+  
+  # Dashboard configuration
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+      - name: 'default'
+        orgId: 1
+        folder: ''
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/default
+  
+  # Dashboard configmaps
+  dashboards:
+    default:
+      hello-api-dashboard:
+        gnetId: 0
+        revision: 0
+        datasource: Prometheus
