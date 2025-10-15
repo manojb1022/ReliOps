@@ -17,7 +17,7 @@ env:
 
 jobs:
   lint-and-test:
-    name: Lint & Test
+    name: Lint, Test & Build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -35,15 +35,26 @@ jobs:
           cd portfolio
           npm ci
 
-      - name: Run ESLint
+      - name: Run ESLint (Code Quality Check)
         run: |
           cd portfolio
           npm run lint
 
-      - name: Build application
+      - name: Build Application (Verify No Breaking Changes)
         run: |
           cd portfolio
           npm run build
+        env:
+          CI: true
+
+      - name: Verify Build Output
+        run: |
+          cd portfolio
+          if [ ! -d ".next" ]; then
+            echo "❌ Build failed: .next directory not found"
+            exit 1
+          fi
+          echo "✅ Build successful: Next.js application compiled without errors"
 
   security-scan:
     name: Security Scan
