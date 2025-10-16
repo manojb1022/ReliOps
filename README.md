@@ -11,8 +11,12 @@ A complete end-to-end DevOps platform showcasing Infrastructure as Code, contain
 
 This project demonstrates a **production-grade DevOps infrastructure** for deploying a Next.js portfolio application with complete observability, auto-scaling, and reliability engineering.
 
-### Live Portfolio
-A modern, responsive portfolio website built with **Next.js 15**, **React 19**, **TypeScript**, and **TailwindCSS**, showcasing real DevOps experience and projects.
+### Live Portfolio & Todo Application
+A modern, responsive portfolio website with a **full-stack Todo application** featuring:
+- **Frontend**: Next.js 15, React 19, TypeScript, TailwindCSS
+- **Backend**: RESTful API with complete CRUD operations
+- **Database**: PostgreSQL with Prisma ORM
+- **Features**: Real-time data persistence, type-safe queries, database migrations
 
 ## 🏗️ Architecture
 
@@ -357,3 +361,58 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 **⭐ If you found this project helpful, please give it a star!**
+
+---
+
+## 📝 Todo Application (Database CRUD Demo)
+
+A production-ready Todo application demonstrating database operations and modern web development practices.
+
+### Features
+- ✅ **Complete CRUD Operations** - Create, Read, Update, Delete
+- 🗄️ **PostgreSQL Database** - Production-grade relational database
+- 🔷 **Prisma ORM** - Type-safe database client with auto-generated types
+- 🎨 **Modern UI** - Beautiful, responsive interface with TailwindCSS
+- 🔌 **RESTful API** - Well-structured API endpoints
+- 📊 **Prisma Studio** - Visual database management tool
+- 🚀 **Real-time Updates** - Instant data persistence
+
+### API Endpoints
+```
+GET    /api/todos       - Fetch all todos
+POST   /api/todos       - Create new todo
+GET    /api/todos/[id]  - Get single todo
+PUT    /api/todos/[id]  - Update todo
+PATCH  /api/todos/[id]  - Partial update
+DELETE /api/todos/[id]  - Delete todo
+```
+
+### Quick Start
+```bash
+# Start PostgreSQL (Docker)
+docker run --name postgres-todo \
+  -e POSTGRES_PASSWORD=postgres \
+  -e POSTGRES_DB=todoapp \
+  -p 5432:5432 \
+  -d postgres:16-alpine
+
+# Setup database
+cd portfolio
+./setup-db.sh
+
+# Start application
+npm run dev
+
+# Open Prisma Studio (Database GUI)
+npm run db:studio
+```
+
+### Tech Stack
+- **Database**: PostgreSQL 16
+- **ORM**: Prisma 6.x
+- **Runtime**: Node.js with Next.js 15
+- **Language**: TypeScript
+- **Styling**: TailwindCSS
+
+See `portfolio/TODO_DATABASE_SETUP.md` for detailed documentation.
+

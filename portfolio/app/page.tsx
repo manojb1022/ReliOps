@@ -35,6 +35,12 @@ export default function Home() {
               >
                 View My Work
               </a>
+              <Link 
+                href="/todo" 
+                className="px-8 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg font-medium hover:shadow-lg transition-shadow"
+              >
+                📝 Todo App
+              </Link>
               <a 
                 href="#contact" 
                 className="px-8 py-3 border-2 border-purple-600 text-purple-600 rounded-lg font-medium hover:bg-purple-50 transition-colors"

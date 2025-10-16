@@ -35,6 +35,11 @@ jobs:
           cd portfolio
           npm ci
 
+      - name: Generate Prisma Client
+        run: |
+          cd portfolio
+          npx prisma generate
+
       - name: Run ESLint (Code Quality Check)
         run: |
           cd portfolio
@@ -46,6 +51,7 @@ jobs:
           npm run build
         env:
           CI: true
+          DATABASE_URL: "postgresql://dummy:dummy@localhost:5432/dummy"
 
       - name: Verify Build Output
         run: |
@@ -134,6 +140,40 @@ jobs:
           #   --wait
           echo "Deployment configuration ready"
 
+  database-migration:
+    name: Database Migration (Manual Trigger)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: portfolio/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd portfolio
+          npm ci
+
+      - name: Run Database Migrations
+        run: |
+          cd portfolio
+          npx prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Seed Database (Optional)
+        run: |
+          cd portfolio
+          npm run db:seed
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
   post-deployment-tests:
     name: Post-Deployment Tests
     runs-on: ubuntu-latest
@@ -143,6 +183,11 @@ jobs:
         run: |
           # curl -f http://portfolio-service:3000/api/health || exit 1
           echo "Health check passed"
+
+      - name: Database Health Check
+        run: |
+          # curl -f http://portfolio-service:3000/api/database/health || exit 1
+          echo "Database health check passed"
 
       - name: Smoke Tests
         run: |

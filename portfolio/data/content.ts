@@ -8,7 +8,7 @@ export const personalInfo = {
   phone: "+91 8431799806",
   location: "Bengaluru, India",
   github: "https://github.com/manojb",
-  linkedin: "https://linkedin.com/in/manojb",
+  linkedin: "https://linkedin.com/in/manojb22",
   yearsExperience: "4",
   downtimeReduction: "90%",
   workloadReduction: "80%",
